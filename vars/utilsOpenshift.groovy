@@ -117,12 +117,14 @@ OpenshiftDeployment watchRollout(Context context, String targetProject, String c
 
     // rolloutResult is e.g.: replication controller "foo-123" successfully rolled out
     // Unfortunately there does not seem a more structured way to retrieve this information.
+    // It is not posssible to work with Regex because all regex supporting classes are not
+    // serializable
     def prefix = "replication controller \""
     def index = rolloutResult.indexOf(prefix)
     def line = rolloutResult[index + prefix.size()..-1]
     index = line.indexOf("\" successfully rolled out")
     def rolloutId = line[0..index - 1]
-    if (!rolloutId.startsWith("${componentId}-")) {
+    if (!rolloutId.startsWith("${componentId}-") || rolloutId.contains("\"")) {
       error "Got '${rolloutResult}' as rollout status, which cannot be parsed properly ..."
     }
 
