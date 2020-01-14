@@ -117,11 +117,15 @@ OpenshiftDeployment watchRollout(Context context, String targetProject, String c
 
     // rolloutResult is e.g.: replication controller "foo-123" successfully rolled out
     // Unfortunately there does not seem a more structured way to retrieve this information.
-    def matches = rolloutResult.findAll(/(?m)\"${componentId}-\d+\"/)
-    if (matches.size() == 0) {
+    def prefix = "replication controller \""
+    def index = rolloutResult.indexOf(prefix)
+    def line = rolloutResult[index + prefix.size()..-1]
+    index = line.indexOf("\" successfully rolled out")
+    def rolloutId = line[0..index - 1]
+    if (!rolloutId.startsWith("${componentId}-")) {
       error "Got '${rolloutResult}' as rollout status, which cannot be parsed properly ..."
     }
-    def rolloutId = matches[0].replaceAll("\"",  "")
+
     def rolloutStatus = sh(
       script: "oc -n ${targetProject} get rc/${rolloutId} -o jsonpath='{.metadata.annotations.openshift\\.io/deployment\\.phase}'",
       label: "Get status of latest rollout of dc/${componentId}",
