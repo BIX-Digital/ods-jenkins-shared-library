@@ -120,7 +120,7 @@ OpenshiftDeployment watchRollout(Context context, String targetProject, String c
     if (! matches.find()) {
       error "Got '${rolloutResult}' as rollout status, which cannot be parsed properly ..."
     }
-    def rolloutId = matches[0]
+    def rolloutId = matches[0][1]
     if (!rolloutId.startsWith("${componentId}-")) {
       error "Got '${rolloutResult}' as rollout status, which cannot be parsed properly ..."
     }
