@@ -1,3 +1,4 @@
+import com.cloudbees.groovy.cps.NonCPS
 import org.ods.OpenshiftDeployment
 import org.ods.Context
 
@@ -85,6 +86,7 @@ def startRollout(Context context, String targetProject, String componentId) {
   )
 }
 
+@NonCPS
 OpenshiftDeployment watchRollout(Context context, String targetProject, String componentId, int rolloutTimeout) {
   def rolloutResult = ''
   try {
@@ -120,7 +122,9 @@ OpenshiftDeployment watchRollout(Context context, String targetProject, String c
     if (! matches.find()) {
       error "Got '${rolloutResult}' as rollout status, which cannot be parsed properly ..."
     }
+    println(matches)
     def rolloutId = matches[0][1]
+    println(rolloutId)
     if (!rolloutId.startsWith("${componentId}-")) {
       error "Got '${rolloutResult}' as rollout status, which cannot be parsed properly ..."
     }
