@@ -96,13 +96,31 @@ OpenshiftDeployment watchRollout(Context context, String targetProject, String c
       ).trim()
       debug(context, rolloutResult)
     }
+
+    /*
+    Considering that the output looks like
+
+    -----------
+    Deployment config "docker-plain-test" waiting on image update
+    Waiting for latest deployment config spec to be observed by the controller loop...
+    Waiting for rollout to finish: 0 out of 1 new replicas have been updated...
+    Waiting for rollout to finish: 0 out of 1 new replicas have been updated...
+    Waiting for rollout to finish: 0 out of 1 new replicas have been updated...
+    Waiting for rollout to finish: 0 of 1 updated replicas are available...
+    Waiting for latest deployment config spec to be observed by the controller loop...
+    replication controller "docker-plain-test-1" successfully rolled out
+    -----------
+
+    and the part that needs extraction is docker-plain-test-1
+     */
+
     // rolloutResult is e.g.: replication controller "foo-123" successfully rolled out
     // Unfortunately there does not seem a more structured way to retrieve this information.
-    def rolloutInfo = rolloutResult.split('"')
-    if (rolloutInfo.size() < 2) {
+    def matches = rolloutResult =~ /(?m)replication controller "(.*)" successfully rolled out/
+    if (! matches.find()) {
       error "Got '${rolloutResult}' as rollout status, which cannot be parsed properly ..."
     }
-    def rolloutId = rolloutInfo[1] // part within the quotes
+    def rolloutId = matches[0]
     if (!rolloutId.startsWith("${componentId}-")) {
       error "Got '${rolloutResult}' as rollout status, which cannot be parsed properly ..."
     }
