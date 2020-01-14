@@ -86,7 +86,6 @@ def startRollout(Context context, String targetProject, String componentId) {
   )
 }
 
-@NonCPS
 OpenshiftDeployment watchRollout(Context context, String targetProject, String componentId, int rolloutTimeout) {
   def rolloutResult = ''
   try {
@@ -118,16 +117,11 @@ OpenshiftDeployment watchRollout(Context context, String targetProject, String c
 
     // rolloutResult is e.g.: replication controller "foo-123" successfully rolled out
     // Unfortunately there does not seem a more structured way to retrieve this information.
-    def matches = rolloutResult =~ /(?m)replication controller "(.*)" successfully rolled out/
-    if (! matches.find()) {
+    def matches = rolloutResult.findAll(/(?m)\"${componentId}-\d+\"/)
+    if (matches.size() == 0) {
       error "Got '${rolloutResult}' as rollout status, which cannot be parsed properly ..."
     }
-    println(matches)
-    def rolloutId = matches[0][1]
-    println(rolloutId)
-    if (!rolloutId.startsWith("${componentId}-")) {
-      error "Got '${rolloutResult}' as rollout status, which cannot be parsed properly ..."
-    }
+    def rolloutId = matches[0].replaceAll("\"",  "")
     def rolloutStatus = sh(
       script: "oc -n ${targetProject} get rc/${rolloutId} -o jsonpath='{.metadata.annotations.openshift\\.io/deployment\\.phase}'",
       label: "Get status of latest rollout of dc/${componentId}",
