@@ -226,4 +226,5 @@ abstract class DocGenUseCase {
     abstract boolean isArchivalRelevant (String documentType)
 
     abstract Map getFiletypeForDocumentType (String documentType)
+
 }
