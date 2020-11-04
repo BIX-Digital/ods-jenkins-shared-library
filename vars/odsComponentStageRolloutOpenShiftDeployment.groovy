@@ -13,11 +13,19 @@ def call(IContext context, Map config = [:]) {
     if (!logger) {
         logger = new Logger (this, !!env.DEBUG)
     }
+    def openShiftService = ServiceRegistry.instance.get(OpenShiftService)
+    if (config.targetProject) {
+        openShiftService = new OpenShiftService(
+            new PipelineSteps(this),
+            logger,
+            config.targetProject
+        )
+    }
     return new RolloutOpenShiftDeploymentStage(
         this,
         context,
         config,
-        ServiceRegistry.instance.get(OpenShiftService),
+        openShiftService,
         ServiceRegistry.instance.get(JenkinsService),
         logger
     ).execute()
