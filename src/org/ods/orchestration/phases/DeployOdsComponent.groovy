@@ -52,7 +52,7 @@ class DeployOdsComponent {
 
             deploymentDescriptor.deployments.each { String deploymentName, Map deployment ->
 
-                importImages(deployment, deploymentName, computeSourceProject())
+                importImages(deployment, deploymentName, project.sourceProject)
 
                 def replicationController = os.rollout(
                     project.targetProject,
@@ -70,7 +70,7 @@ class DeployOdsComponent {
                 )
                 // TODO: Once the orchestration pipeline can deal with multiple replicas,
                 // update this to deal with multiple pods.
-                def pod = podData[0]
+                def pod = podData[0].toMap()
 
                 verifyImageShas(deployment, pod.containers)
 
@@ -90,15 +90,6 @@ class DeployOdsComponent {
             openShiftDir = 'openshift'
         }
         openShiftDir
-    }
-
-    private void computeSourceProject() {
-        def sourceEnv = Project.getConcreteEnvironment(
-            project.sourceEnv,
-            project.buildParams.version.toString(),
-            project.versionedDevEnvsEnabled
-        )
-        "${project.key}-${sourceEnv}"
     }
 
     private Map gatherOriginalDeploymentVersions(Map<String, Object> deployments) {

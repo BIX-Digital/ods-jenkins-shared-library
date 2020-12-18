@@ -69,8 +69,6 @@ interface IContext {
     // Define which branches are deployed to which environments.
     Map<String, String> getBranchToEnvironmentMapping()
 
-    List<String> getImagePromotionSequences()
-
     // The environment which was chosen as the deployment target, e.g. "dev".
     String getEnvironment()
 
@@ -79,6 +77,9 @@ interface IContext {
 
     // Target project, based on the environment. E.g. "foo-dev".
     String getTargetProject()
+
+    // Name of the CD project
+    String getCdProject()
 
     // Group ID, defaults to: org.opendevstack.<projectID>.
     String getGroupId()
